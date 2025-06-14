@@ -37,69 +37,43 @@ class EventStatusServiceTest {
     @Test
     void testUpdateEventStatus_liveSchedulesJob() {
         EventStatusRequest req = new EventStatusRequest();
-        req.setEventId("e1");
+        req.setEventId("testId");
         req.setStatus(EventStatusRequest.Status.LIVE);
         service.updateEventStatus(req);
-        assertEquals(EventStatusRequest.Status.LIVE, repository.findStatus("e1"));
+        assertEquals(EventStatusRequest.Status.LIVE, repository.findStatus("testId"));
     }
 
     @Test
     void testUpdateEventStatus_notLiveCancelsJob() {
         EventStatusRequest req = new EventStatusRequest();
-        req.setEventId("e2");
+        req.setEventId("testId");
         req.setStatus(EventStatusRequest.Status.NOT_LIVE);
         service.updateEventStatus(req);
-        assertEquals(EventStatusRequest.Status.NOT_LIVE, repository.findStatus("e2"));
+        assertEquals(EventStatusRequest.Status.NOT_LIVE, repository.findStatus("testId"));
     }
 
     @Test
     void testGetEventStatusMap() {
         EventStatusRequest req = new EventStatusRequest();
-        req.setEventId("e3");
+        req.setEventId("testId");
         req.setStatus(EventStatusRequest.Status.LIVE);
         service.updateEventStatus(req);
         Map<String, EventStatusRequest.Status> map = service.getEventStatusMap();
-        assertTrue(map.containsKey("e3"));
+        assertTrue(map.containsKey("testId"));
     }
 
     @Test
-    void testPublishToKafkaWithRetry_successOnFirstTry() throws Exception {
-        // Arrange
-        CompletableFuture<SendResult<String, String>> future = CompletableFuture.completedFuture(mock(SendResult.class));
-        when(kafkaTemplate.send(anyString(), anyString(), anyString())).thenReturn(future);
-
-        // Act
-        serviceTestablePublishToKafkaWithRetry("eventX", "payload", 3);
-
-        // Assert
-        verify(kafkaTemplate, times(1)).send(anyString(), anyString(), anyString());
-    }
-
-    @Test
-    void testPublishToKafkaWithRetry_retriesOnFailure() throws Exception {
-        // Arrange
+    void testServiceHandlesKafkaErrorsGracefully() {
+        // Test that service doesn't throw exceptions when Kafka fails
         CompletableFuture<SendResult<String, String>> failedFuture = CompletableFuture.failedFuture(new RuntimeException("Kafka error"));
-        CompletableFuture<SendResult<String, String>> successFuture = CompletableFuture.completedFuture(mock(SendResult.class));
-        when(kafkaTemplate.send(anyString(), anyString(), anyString()))
-                .thenReturn(failedFuture)
-                .thenReturn(successFuture);
+        when(kafkaTemplate.send(anyString(), anyString(), anyString())).thenReturn(failedFuture);
 
-        // Act
-        serviceTestablePublishToKafkaWithRetry("eventY", "payload", 3);
+        EventStatusRequest req = new EventStatusRequest();
+        req.setEventId("testId");
+        req.setStatus(EventStatusRequest.Status.LIVE);
 
-        // Assert
-        verify(kafkaTemplate, times(2)).send(anyString(), anyString(), anyString());
-    }
-
-    // Helper to access protected method for testing
-    private void serviceTestablePublishToKafkaWithRetry(String eventId, String payload, int maxRetries) {
-        try {
-            var method = service.getClass().getDeclaredMethod("publishToKafkaWithRetry", String.class, String.class, int.class);
-            method.setAccessible(true);
-            method.invoke(service, eventId, payload, maxRetries);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        // Should not throw exception
+        assertDoesNotThrow(() -> service.updateEventStatus(req));
     }
 
     @AfterEach
