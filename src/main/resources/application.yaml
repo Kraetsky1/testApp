@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: event-status-app
+  kafka:
+    bootstrap-servers: localhost:9092
+
+kafka:
+  topic: event-status-topic
+
+external:
+  api:
+    url: http://localhost:8081/mock 
