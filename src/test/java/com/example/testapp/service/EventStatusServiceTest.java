@@ -64,7 +64,6 @@ class EventStatusServiceTest {
 
     @Test
     void testServiceHandlesKafkaErrorsGracefully() {
-        // Test that service doesn't throw exceptions when Kafka fails
         CompletableFuture<SendResult<String, String>> failedFuture = CompletableFuture.failedFuture(new RuntimeException("Kafka error"));
         when(kafkaTemplate.send(anyString(), anyString(), anyString())).thenReturn(failedFuture);
 
@@ -72,12 +71,6 @@ class EventStatusServiceTest {
         req.setEventId("testId");
         req.setStatus(EventStatusRequest.Status.LIVE);
 
-        // Should not throw exception
         assertDoesNotThrow(() -> service.updateEventStatus(req));
-    }
-
-    @AfterEach
-    void tearDown() {
-        // Clean up if needed
     }
 } 
