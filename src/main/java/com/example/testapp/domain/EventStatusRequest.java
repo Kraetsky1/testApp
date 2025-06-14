@@ -1,5 +1,7 @@
 package com.example.testapp.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -14,7 +16,7 @@ public class EventStatusRequest {
 
     public enum Status {
         LIVE("live"), 
-        NOT_LIVE("not_live");
+        NOT_LIVE("not live");
 
         private final String value;
 
@@ -22,9 +24,20 @@ public class EventStatusRequest {
             this.value = value;
         }
 
+        @JsonValue
         @Override
         public String toString() {
             return value;
+        }
+
+        @JsonCreator
+        public static Status fromValue(String value) {
+            for (Status status : Status.values()) {
+                if (status.value.equals(value)) {
+                    return status;
+                }
+            }
+            throw new IllegalArgumentException("Unknown status value: " + value);
         }
     }
 } 
