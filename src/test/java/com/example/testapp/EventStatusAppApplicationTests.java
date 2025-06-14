@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class EventStatusAppApplicationTests {
 
-	//Todo: Implement integration tests if
+	//Todo: Implement integration tests if needed
 	@Test
 	void contextLoads() {
 	}
