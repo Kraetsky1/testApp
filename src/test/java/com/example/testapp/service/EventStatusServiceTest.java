@@ -2,20 +2,13 @@ package com.example.testapp.service;
 
 import com.example.testapp.domain.EventStatusRequest;
 import com.example.testapp.repository.EventStatusRepository;
-import com.example.testapp.service.EventStatusService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
-import org.junit.jupiter.api.AfterEach;
-import org.mockito.InOrder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,7 +18,6 @@ class EventStatusServiceTest {
     private EventStatusRepository repository;
     private KafkaTemplate<String, String> kafkaTemplate;
     private EventStatusService service;
-    private static final Logger logger = LoggerFactory.getLogger(EventStatusServiceTest.class);
 
     @BeforeEach
     void setUp() {
